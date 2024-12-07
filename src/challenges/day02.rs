@@ -1,3 +1,4 @@
+use advent24::parse_number_list;
 use clap;
 use std::{fs, str};
 
@@ -6,97 +7,81 @@ pub struct Args {
     #[arg(default_value_t = String::from("./inputs/day2/input.txt"))]
     file: String,
 
-    /// What is the sum of the minimum number of each color multiplied together
     #[clap(long, short, action)]
     part2: bool,
 }
 
-pub struct Game {
-    id: u64,
-    red: Vec<u64>,
-    blue: Vec<u64>,
-    green: Vec<u64>,
+#[derive(Debug, PartialEq)]
+enum PlantState {
+    Initial(i64),
+    SafeIncreasing(i64),
+    SafeDecreasing(i64),
+    Unsafe,
 }
 
-impl Game {
-    pub fn new(id: u64, red: Vec<u64>, blue: Vec<u64>, green: Vec<u64>) -> Self {
-        Self {
-            id,
-            red,
-            blue,
-            green,
+impl PlantState {
+    fn next_state(&self, next: i64) -> Self {
+        match self {
+            Self::Initial(num) | Self::SafeIncreasing(num) if (next > *num && next <= *num + 3) => {
+                Self::SafeIncreasing(next)
+            }
+            Self::Initial(num) | Self::SafeDecreasing(num) if (next < *num && next >= *num - 3) => {
+                Self::SafeDecreasing(next)
+            }
+            _ => Self::Unsafe,
         }
     }
+}
 
-    pub fn from_string(input: String) -> Option<Self> {
-        // Parses "Game 1: 1 blue, 1 red; 10 red; 8 red, 1 blue, 1 green; 1 green, 5 blue"
-        let parts: Vec<&str> = input.split(": ").collect();
-        let id: u64 = parts[0].trim().trim_start_matches("Game ").parse().ok()?;
-        let rolls: Vec<&str> = parts[1].split(";").collect();
-        let mut reds: Vec<u64> = vec![];
-        let mut blues: Vec<u64> = vec![];
-        let mut greens: Vec<u64> = vec![];
-        for roll in rolls {
-            let count_and_colors: Vec<&str> = roll.split(", ").collect();
-            for count_and_color in count_and_colors {
-                let count_and_color_parts: Vec<&str> = count_and_color.trim().split(" ").collect();
-                let count: u64 = count_and_color_parts[0].trim().parse().ok()?;
-                let color: &str = count_and_color_parts[1];
-                match color {
-                    "red" => reds.push(count),
-                    "blue" => blues.push(count),
-                    "green" => greens.push(count),
-                    _ => (),
+fn part1(input: String) -> i64 {
+    let mut safe = 0;
+    for line in input.lines() {
+        let digits: Vec<i64> = parse_number_list(&line);
+        let state = digits[1..]
+            .iter()
+            .fold(PlantState::Initial(digits[0]), |s, item| {
+                s.next_state(*item)
+            });
+        safe += match state {
+            PlantState::SafeIncreasing(_) | PlantState::SafeDecreasing(_) => 1,
+            _ => 0,
+        }
+    }
+    safe
+}
+
+fn part2(input: String) -> i64 {
+    let mut safe = 0;
+    for line in input.lines() {
+        let digits: Vec<i64> = parse_number_list(&line);
+        for one_to_skip in 0..digits.len() {
+            let mut new_digits = vec![];
+            for (i, n) in digits.iter().enumerate() {
+                if i != one_to_skip {
+                    new_digits.push(*n);
                 }
             }
+            let state = new_digits[1..]
+                .iter()
+                .fold(PlantState::Initial(new_digits[0]), |s, item| {
+                    s.next_state(*item)
+                });
+            if state != PlantState::Unsafe {
+                safe += 1;
+                break;
+            }
         }
-        Some(Self::new(id, reds, blues, greens))
     }
-
-    pub fn max_red(&self) -> u64 {
-        self.red.iter().cloned().max().unwrap_or(0)
-    }
-
-    pub fn max_blue(&self) -> u64 {
-        self.blue.iter().cloned().max().unwrap_or(0)
-    }
-
-    pub fn max_green(&self) -> u64 {
-        self.green.iter().cloned().max().unwrap_or(0)
-    }
-
-    pub fn multiply_colors(&self) -> u64 {
-        self.max_red() * self.max_green() * self.max_blue()
-    }
-
-    pub fn is_possible(&self, red: u64, green: u64, blue: u64) -> bool {
-        red >= self.max_red() && green >= self.max_green() && blue >= self.max_blue()
-    }
+    safe
 }
 
 pub fn entrypoint(args: &Args) {
     let input = fs::read_to_string(&args.file).expect("I/O error");
-    let mut games: Vec<Game> = vec![];
-    let mut total: u64 = 0;
-    for line in input.lines() {
-        match Game::from_string(line.to_string()) {
-            Some(game) => games.push(game),
-            None => println!("Could not parse game: {}", line),
-        }
-    }
+    let result: i64;
     if args.part2 {
-        for game in games {
-            total += game.multiply_colors();
-        }
-        println!("{}", total)
+        result = part2(input);
     } else {
-        print!("possible: ");
-        for game in games {
-            if game.is_possible(12, 13, 14) {
-                print!("{} ", game.id);
-                total += game.id;
-            }
-        }
-        println!("\n   total: {}", total)
+        result = part1(input);
     }
+    println!("{}", result);
 }

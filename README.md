@@ -1,4 +1,4 @@
-# Advent23
+# advent24
 
 Derek Howard's Advent of Code 2023 [solutions](src/challenges/) in Rust.
 

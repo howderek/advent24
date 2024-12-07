@@ -1,7 +1,7 @@
 use clap::Parser;
 
 mod challenges;
-pub mod vendor;
+mod vendor;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -42,12 +42,6 @@ enum Command {
     Day23(challenges::day23::Args),
     Day24(challenges::day24::Args),
     Day25(challenges::day25::Args),
-    Day26(challenges::day26::Args),
-    Day27(challenges::day27::Args),
-    Day28(challenges::day28::Args),
-    Day29(challenges::day29::Args),
-    Day30(challenges::day30::Args),
-    Day31(challenges::day31::Args),
 }
 
 fn main() {
@@ -78,11 +72,5 @@ fn main() {
         Command::Day23(args) => challenges::day23::entrypoint(args),
         Command::Day24(args) => challenges::day24::entrypoint(args),
         Command::Day25(args) => challenges::day25::entrypoint(args),
-        Command::Day26(args) => challenges::day26::entrypoint(args),
-        Command::Day27(args) => challenges::day27::entrypoint(args),
-        Command::Day28(args) => challenges::day28::entrypoint(args),
-        Command::Day29(args) => challenges::day29::entrypoint(args),
-        Command::Day30(args) => challenges::day30::entrypoint(args),
-        Command::Day31(args) => challenges::day31::entrypoint(args),
     }
 }

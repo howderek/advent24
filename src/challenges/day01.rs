@@ -1,69 +1,74 @@
 use clap;
 use regex::Regex;
-use std::{fs, str};
+use std::{collections::HashMap, fs, iter::zip, str};
 
 #[derive(clap::Args, Debug)]
 pub struct Args {
-    #[arg(default_value_t = String::from("./inputs/day1/input.txt"))]
+    #[arg(default_value_t = String::from("./inputs/day2/input.txt"))]
     file: String,
 
     #[clap(long, short, action)]
     part2: bool,
 }
 
-fn parse_digit(input: &str) -> Option<u64> {
-    match input {
-        "one" => Some(1),
-        "two" => Some(2),
-        "three" => Some(3),
-        "four" => Some(4),
-        "five" => Some(5),
-        "six" => Some(6),
-        "seven" => Some(7),
-        "eight" => Some(8),
-        "nine" => Some(9),
-        _ => input.parse::<u64>().ok(),
+fn extract_lists(input: String) -> (Vec<i64>, Vec<i64>) {
+    let re = Regex::new(r"(\d+)   (\d+)").unwrap();
+
+    let mut left_list: Vec<i64> = vec![];
+    let mut right_list: Vec<i64> = vec![];
+
+    for (_, [left, right]) in re.captures_iter(&input).map(|c| c.extract()) {
+        left_list.push(left.parse().unwrap());
+        right_list.push(right.parse().unwrap());
     }
+
+    (left_list, right_list)
 }
 
-fn extract_digits_written(input: String) -> Option<u64> {
-    let first_re = Regex::new(r"(one|two|three|four|five|six|seven|eight|nine|\d)").unwrap();
-    let last_re = Regex::new(r".*(one|two|three|four|five|six|seven|eight|nine|\d).*$").unwrap();
+fn vec_to_counts(v: &Vec<i64>) -> HashMap<i64, i64> {
+    let mut res = HashMap::new();
 
-    let mut count: u64 = 0;
-
-    for line in input.lines() {
-        let first_cap = first_re.captures(line)?;
-        let last_cap = last_re.captures(line)?;
-        let first_digit = parse_digit(first_cap.get(1)?.as_str())?;
-        let last_digit = parse_digit(last_cap.get(1)?.as_str())?;
-        count += (first_digit * 10) + last_digit
+    for k in v.iter() {
+        *res.entry(*k).or_insert(0) += 1;
     }
 
-    Some(count)
+    res
 }
 
-fn extract_digits(input: String) -> Option<u64> {
-    let re = Regex::new(r"\d").unwrap();
-    let mut count: u64 = 0;
+fn part1(input: String) -> Option<i64> {
+    let (mut left_list, mut right_list) = extract_lists(input);
+    left_list.sort();
+    right_list.sort();
 
-    for line in input.lines() {
-        let c: Vec<_> = re.captures_iter(line).collect();
-        let first_digit = c.get(0)?.get(0)?.as_str().parse::<u64>().ok()?;
-        let last_digit = c.get(c.len() - 1)?.get(0)?.as_str().parse::<u64>().ok()?;
-        count += (first_digit * 10) + last_digit
+    let mut differences = 0;
+    for (left, right) in zip(left_list, right_list) {
+        differences += i64::abs(left - right)
     }
 
-    Some(count)
+    Some(differences)
+}
+
+fn part2(input: String) -> Option<i64> {
+    let (left_list, right_list) = extract_lists(input);
+    let counts = vec_to_counts(&right_list);
+
+    let mut similarity_score = 0;
+    for number in left_list.iter() {
+        similarity_score += *number * counts.get(number).unwrap_or(&0);
+    }
+
+    Some(similarity_score)
 }
 
 pub fn entrypoint(args: &Args) {
     let input = fs::read_to_string(&args.file).expect("I/O error");
-    let mut extract_fn = extract_digits as fn(String) -> Option<u64>;
+    let result: Option<i64>;
     if args.part2 {
-        extract_fn = extract_digits_written as fn(String) -> Option<u64>;
+        result = part2(input);
+    } else {
+        result = part1(input);
     }
-    match extract_fn(input) {
+    match result {
         Some(count) => println!("{}", count),
         None => println!("No digits found"),
     }
