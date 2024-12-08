@@ -1,6 +1,6 @@
 use core::str;
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     fmt,
     ops::{Add, Index, IndexMut, Mul, Sub},
     slice::{Chunks, ChunksMut},
@@ -14,7 +14,7 @@ pub struct ByteGrid {
     pub data: Vec<u8>,
 }
 
-#[derive(Debug, Hash, Copy, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Hash, Copy, Clone, PartialEq, Eq, Default, PartialOrd, Ord)]
 pub struct Point {
     pub row: i32,
     pub col: i32,
@@ -215,15 +215,18 @@ impl ByteGrid {
     #[inline]
     pub fn idx_to_coord(&self, idx: usize) -> (i32, i32) {
         let idx_u32 = idx as i32;
-        (idx_u32 / self.width, idx_u32 - (idx_u32 / self.width))
+        (
+            idx_u32 / self.width,
+            idx_u32 - (idx_u32 / self.width) * self.width,
+        )
     }
 
     #[inline]
     pub fn idx_to_point(&self, idx: usize) -> Point {
-        let idx_u32 = idx as i32;
+        let idx_i32 = idx as i32;
         Point {
-            row: idx_u32 / self.width,
-            col: idx_u32 - (idx_u32 / self.width),
+            row: idx_i32 / self.width,
+            col: idx_i32 - (idx_i32 / self.width) * self.width,
         }
     }
 
@@ -241,6 +244,28 @@ impl ByteGrid {
 
     pub fn get_point_mut(&mut self, p: Point) -> Option<&mut u8> {
         self.data.get_mut((p.row * self.width + p.col) as usize)
+    }
+
+    pub fn count(&self, b: u8) -> usize {
+        let mut seen = 0;
+        for c in self.data.iter() {
+            if *c == b {
+                seen += 1;
+            }
+        }
+        seen
+    }
+
+    /// Return a map from each kind of byte to all the points it is found
+    pub fn bytes_to_points(&self) -> HashMap<u8, Vec<Point>> {
+        let mut bytes_to_points: HashMap<u8, Vec<Point>> = HashMap::new();
+        for (i, c) in self.data.iter().enumerate() {
+            bytes_to_points
+                .entry(*c)
+                .or_insert_with(|| vec![])
+                .push(self.idx_to_point(i));
+        }
+        bytes_to_points
     }
 
     #[inline]

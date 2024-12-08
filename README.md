@@ -1,6 +1,6 @@
 # advent24
 
-Derek Howard's Advent of Code 2023 [solutions](src/challenges/) in Rust.
+Derek Howard's Advent of Code 2024 [solutions](src/challenges/) in Rust.
 
 ## Running Solutions
 
