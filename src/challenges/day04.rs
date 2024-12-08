@@ -1,10 +1,6 @@
 use advent24::{string_to_2d_array, Tile};
 use clap;
-use std::iter::zip;
-use std::{
-    collections::{HashSet, VecDeque},
-    fs, str,
-};
+use std::{fs, str};
 
 #[derive(clap::Args, Debug)]
 pub struct Args {

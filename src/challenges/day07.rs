@@ -1,4 +1,4 @@
-use advent24::{parse_number_list, print_2d_array, string_to_2d_array, Tile};
+use advent24::parse_number_list;
 use clap;
 use std::{fs, str};
 
@@ -13,14 +13,11 @@ pub struct Args {
 
 pub fn part1(args: &Args) -> i64 {
     let input = fs::read_to_string(&args.file).expect("I/O error");
-    let add = |a: i64, b: i64| a + b;
-    let mul = |a: i64, b: i64| a * b;
     let mut grand_total = 0;
     for line in input.lines() {
         let mut part_iter = line.split(":");
         let correct_total: i64 = part_iter.next().unwrap().parse().unwrap();
         let parts: Vec<i64> = parse_number_list(part_iter.next().unwrap());
-        let mut operators: Vec<fn(i64, i64) -> i64> = vec![];
         for i in 0..i64::pow(2, (parts.len() - 1) as u32) {
             let mut total = parts[0];
             for (j, part) in parts[1..].iter().enumerate() {

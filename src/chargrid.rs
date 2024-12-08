@@ -21,11 +21,11 @@ pub struct Point {
 }
 
 impl Point {
-    fn new(row: i32, col: i32) -> Point {
+    pub fn new(row: i32, col: i32) -> Point {
         Point { row, col }
     }
 
-    fn adjacencies(self) -> [Point; 8] {
+    pub fn adjacencies(self) -> [Point; 8] {
         [
             self + NORTHWEST,
             self + NORTH,
@@ -38,11 +38,11 @@ impl Point {
         ]
     }
 
-    fn orthogonals(self) -> [Point; 4] {
+    pub fn orthogonals(self) -> [Point; 4] {
         [self + NORTH, self + WEST, self + EAST, self + SOUTH]
     }
 
-    fn diagonals(self) -> [Point; 4] {
+    pub fn diagonals(self) -> [Point; 4] {
         [
             self + NORTHWEST,
             self + NORTHEAST,
@@ -79,8 +79,8 @@ impl Mul for Point {
 
     fn mul(self, other: Self) -> Self {
         Self {
-            row: self.row * self.row,
-            col: self.col * self.col,
+            row: self.row * other.row,
+            col: self.col * other.col,
         }
     }
 }

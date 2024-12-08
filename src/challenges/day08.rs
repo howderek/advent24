@@ -1,13 +1,7 @@
-use advent24::{
-    chargrid::{ByteGrid, Point, ORIGIN},
-    parse_number_list, print_2d_array, string_to_2d_array, Tile,
-};
+use advent24::chargrid::{ByteGrid, ORIGIN};
 use clap;
 use itertools::{self, Itertools};
-use std::{
-    collections::{HashMap, HashSet},
-    fs, iter, str,
-};
+use std::{fs, str};
 
 #[derive(clap::Args, Debug)]
 pub struct Args {
@@ -54,21 +48,27 @@ pub fn entrypoint(args: &Args) {
     println!("part2: {}", solver(&input, 0, 1000));
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use test::Bencher;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn test_u8_grid() {
-//         let mut grid = ByteGrid::new(
-//             "190: 10 19\n\
-//              3267: 81 40 27\n\
-//              83: 17 5\n\
-//              156: 15 6\n\
-//              7290: 6 8 6 15\n\
-//              161011: 16 10 13\n\
-//              192: 17 8 14\n\
-//              21037: 9 7 18 13\n\
-//              292: 11 6 16 20",
-//         );
+    const TEST_GRID: &str = "\
+............
+........0...
+.....0......
+.......0....
+....0.......
+......A.....
+............
+............
+........A...
+.........A..
+............
+............";
+
+    #[test]
+    fn test_day8() {
+        assert_eq!(solver(&TEST_GRID, 1, 1), 14);
+        assert_eq!(solver(&TEST_GRID, 0, 100), 34);
+    }
+}

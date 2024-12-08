@@ -1,13 +1,8 @@
-use advent24::{parse_number_list_delimited_by, string_to_2d_array, Tile};
+use advent24::parse_number_list_delimited_by;
 use clap;
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::hash::Hash;
-use std::iter::zip;
-use std::{
-    collections::{HashSet, VecDeque},
-    fs, str,
-};
+use std::{fs, str};
 
 #[derive(clap::Args, Debug)]
 pub struct Args {

@@ -1,7 +1,6 @@
 use clap::Parser;
 
 mod challenges;
-mod vendor;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
