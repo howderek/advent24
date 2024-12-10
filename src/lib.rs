@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-pub mod chargrid;
+pub mod bytegrid;
 
 pub fn parse_number_list<T: std::str::FromStr>(s: &str) -> Vec<T> {
     s.split_whitespace()

@@ -1,10 +1,9 @@
-use advent24::chargrid::{ByteGrid, ORIGIN};
 use clap;
-use itertools::{Itertools, PeekingNext};
+use itertools::PeekingNext;
 use std::{
     cmp::Reverse,
-    collections::{BinaryHeap, HashSet, VecDeque},
-    fs, str, usize, vec,
+    collections::{BinaryHeap, HashSet},
+    fs,
 };
 
 #[derive(clap::Args, Debug)]
@@ -58,9 +57,9 @@ pub fn score_fs(fs: &Vec<Block>) -> usize {
 }
 
 pub fn part1(input: &str) -> usize {
-    let mut fs = parse_puzzle(&input);
+    let fs = parse_puzzle(&input);
     let mut new_fs: Vec<Block> = vec![];
-    let mut fwd_iter = fs.iter();
+    let fwd_iter = fs.iter();
     let mut rev_iter = fs.iter().rev();
     let mut seen_ids = HashSet::<usize>::new();
     let mut total_i = 0;

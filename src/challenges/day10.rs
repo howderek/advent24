@@ -1,13 +1,6 @@
-use advent24::chargrid::{ByteGrid, Point, ORIGIN};
-use atoi::atoi;
+use advent24::bytegrid::{ByteGrid, Point};
 use clap;
-use itertools::{Itertools, PeekingNext};
-use pathfinding::prelude::{astar, astar_bag_collect};
-use std::{
-    cmp::Reverse,
-    collections::{BinaryHeap, HashSet, VecDeque},
-    fs, str, usize, vec,
-};
+use std::{collections::VecDeque, fs};
 
 #[derive(clap::Args, Debug)]
 pub struct Args {
@@ -18,59 +11,45 @@ pub struct Args {
     part2: bool,
 }
 
-pub fn solve(input: &str) -> (usize, usize) {
-    let mut grid = ByteGrid::new(input);
+pub fn solve(input: &str) -> (i32, i32) {
+    let grid = ByteGrid::new(input);
     let bytes_to_points = grid.bytes_to_points();
-
-    let successors = |p: &Point, offset: i8| -> Vec<(Point, u32)> {
-        let mut res: Vec<Point> = vec![];
-        let val: i8 = atoi(&[grid[*p]]).unwrap();
-        for adj in p.orthogonals() {
-            if grid.is_valid_point(adj) {
-                let next_val: i8 = atoi(&[grid[adj]]).unwrap();
-                if next_val == val + offset {
-                    res.push(adj);
-                }
-            }
-        }
-        res.into_iter().map(|p| (p, 1)).collect()
-    };
-
-    fn heuristic(a: &Point, b: &Point) -> u32 {
-        (a.col.abs_diff(b.col) + a.row.abs_diff(b.row)) as u32
-    }
 
     let mut p1_score = 0;
     let mut p2_score = 0;
 
+    let mut queue: VecDeque<Point> = VecDeque::new();
+    let mut visited: Vec<i32> = vec![0; grid.data.len()];
+
     for root in bytes_to_points[&b'0'].iter() {
-        for dest in bytes_to_points[&b'9'].iter() {
-            if let Some(result) = astar_bag_collect(
-                root,
-                |p| successors(p, 1),
-                |p| heuristic(p, dest),
-                |p| p == dest,
-            ) {
+        queue.push_back(*root);
+        visited.fill(0);
+        visited[grid.point_to_idx(*root)] = 1;
+
+        grid.bfs_all(*root, |p| {
+            let val = grid[p];
+            let mut adj = vec![];
+            let times_visited = visited[grid.point_to_idx(p)];
+            if val == b'9' {
                 p1_score += 1;
-                for path in result.0 {
-                    // let mut new_grid = ByteGrid::new(input);
-                    // for v in new_grid.data.iter_mut() {
-                    //     *v = b'.';
-                    // }
-                    // for point in result.0.iter() {
-                    //     new_grid[*point] = grid[*point];
-                    // }
-                    // println!("{}\n", new_grid);
-                    p2_score += 1;
+                p2_score += times_visited;
+            } else {
+                for ortho in p
+                    .orthogonals()
+                    .into_iter()
+                    .filter(|p| grid.is_valid_point(*p) && grid[*p] == val + 1)
+                {
+                    if visited[grid.point_to_idx(ortho)] == 0 {
+                        adj.push(ortho);
+                    }
+                    visited[grid.point_to_idx(ortho)] += times_visited;
                 }
             }
-        }
+            Some(adj)
+        });
     }
-    (p1_score, p2_score)
-}
 
-pub fn part2(input: &str) -> usize {
-    0
+    (p1_score, p2_score)
 }
 
 pub fn entrypoint(args: &Args) {
@@ -95,13 +74,7 @@ mod tests {
 10456732";
 
     #[test]
-    fn test_day9_part1() {
+    fn test_day9() {
         assert_eq!(solve(&TEST_GRID), (36, 81));
-    }
-
-    #[test]
-    fn test_day9_part2() {
-
-        // assert_eq!(part2(&"171010402"), 88);
     }
 }

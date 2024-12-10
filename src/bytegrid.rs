@@ -1,6 +1,6 @@
 use core::str;
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, VecDeque},
     fmt,
     ops::{Add, Index, IndexMut, Mul, Sub},
     slice::{Chunks, ChunksMut},
@@ -213,6 +213,11 @@ impl ByteGrid {
     }
 
     #[inline]
+    pub fn point_to_idx(&self, p: Point) -> usize {
+        (p.row * self.width + p.col) as usize
+    }
+
+    #[inline]
     pub fn idx_to_coord(&self, idx: usize) -> (i32, i32) {
         let idx_u32 = idx as i32;
         (
@@ -327,6 +332,29 @@ impl ByteGrid {
             }
         }
         total
+    }
+
+    pub fn bfs_all(
+        &self,
+        root: Point,
+        mut successors: impl FnMut(Point) -> Option<Vec<Point>>,
+    ) -> Vec<bool> {
+        let mut queue: VecDeque<Point> = VecDeque::new();
+        let mut visited: Vec<bool> = vec![false; self.data.len()];
+        queue.push_back(root);
+        while let Some(point) = queue.pop_front() {
+            visited[self.point_to_idx(point)] = true;
+            if let Some(successors) = successors(point) {
+                for successor in successors {
+                    if self.is_valid_point(successor) && !visited[self.point_to_idx(successor)] {
+                        queue.push_back(successor);
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+        visited
     }
 
     pub fn u8s_surrounding(&self, point: Point, offsets: &[Point]) -> Option<Vec<u8>> {

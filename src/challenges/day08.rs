@@ -1,4 +1,4 @@
-use advent24::chargrid::{ByteGrid, ORIGIN};
+use advent24::bytegrid::{ByteGrid, ORIGIN};
 use clap;
 use itertools::{self, Itertools};
 use std::{fs, str};
