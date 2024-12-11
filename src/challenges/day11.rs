@@ -1,9 +1,6 @@
-use advent24::{bytegrid::ByteGrid, parse_number_list};
+use advent24::parse_number_list;
 use clap;
-use std::{
-    collections::{HashMap, HashSet},
-    fs, str,
-};
+use std::{collections::HashMap, fs, str};
 
 #[derive(clap::Args, Debug)]
 pub struct Args {
@@ -44,24 +41,24 @@ pub fn blink(stones: HashMap<u64, u64>) -> HashMap<u64, u64> {
 }
 
 pub fn part1(input: &str) -> u64 {
-    let mut stones: Vec<u64> = parse_number_list(input);
+    let stones: Vec<u64> = parse_number_list(input);
     let mut stone_map: HashMap<u64, u64> = HashMap::new();
     for s in stones.iter() {
         stone_map.entry(*s).and_modify(|v| *v += 1).or_insert(1);
     }
-    for i in 0..25 {
+    for _ in 0..25 {
         stone_map = blink(stone_map);
     }
     stone_map.values().sum::<u64>() as u64
 }
 
 pub fn part2(input: &str) -> u64 {
-    let mut stones: Vec<u64> = parse_number_list(input);
+    let stones: Vec<u64> = parse_number_list(input);
     let mut stone_map: HashMap<u64, u64> = HashMap::new();
     for s in stones.iter() {
         stone_map.entry(*s).and_modify(|v| *v += 1).or_insert(1);
     }
-    for i in 0..75 {
+    for _ in 0..75 {
         stone_map = blink(stone_map);
     }
     stone_map.values().sum::<u64>() as u64
