@@ -11,110 +11,11 @@ pub struct Args {
     part2: bool,
 }
 
-#[derive(Debug)]
-pub struct Region {
-    byte: u8,
-    points: Vec<Point>,
-    min_row: i32,
-    max_row: i32,
-    min_col: i32,
-    max_col: i32,
-    area: i32,
-    sides: i32,
-    perimeter: i32,
-}
-
-impl Region {
-    pub fn new(byte: u8) -> Self {
-        Region {
-            byte: byte,
-            points: vec![],
-            min_row: i32::MAX,
-            max_row: 0,
-            min_col: i32::MAX,
-            max_col: 0,
-            area: 0,
-            sides: 0,
-            perimeter: 0,
-        }
-    }
-
-    pub fn add_point(&mut self, grid: &ByteGrid, point: Point) {
-        if point.row < self.min_row {
-            self.min_row = point.row;
-        }
-        if point.row > self.max_row {
-            self.max_row = point.row;
-        }
-        if point.col < self.min_col {
-            self.min_col = point.col;
-        }
-        if point.col > self.max_col {
-            self.max_col = point.col;
-        }
-        for adj in point.orthogonals() {
-            if let Some(p) = grid.get_point(adj) {
-                if *p != self.byte {
-                    self.perimeter += 1;
-                }
-            } else {
-                self.perimeter += 1;
-            }
-        }
-        for corner in point.corners() {
-            if grid.get_point(corner[0]) != Some(&self.byte)
-                && grid.get_point(corner[2]) != Some(&self.byte)
-            {
-                self.sides += 1;
-            } else if grid.get_point(corner[0]) == Some(&self.byte)
-                && grid.get_point(corner[2]) == Some(&self.byte)
-                && grid.get_point(corner[1]) != Some(&self.byte)
-            {
-                self.sides += 1;
-            }
-        }
-
-        self.area += 1;
-        self.points.push(point);
-    }
-
-    pub fn area(&self) -> i32 {
-        self.area
-    }
-
-    pub fn sides(&self) -> i32 {
-        self.sides
-    }
-
-    pub fn p1_score(&self) -> i32 {
-        self.area() * self.perimeter
-    }
-
-    pub fn p2_score(&self) -> i32 {
-        self.area() * self.sides()
-    }
-}
-
 pub fn solve(input: &str) -> (i32, i32) {
     let grid = ByteGrid::new(input);
-    let mut regions: Vec<Region> = vec![];
-    let mut seen: HashSet<Point> = HashSet::new();
-    for row in 0..grid.height {
-        for col in 0..grid.width {
-            let point = Point::new(row, col);
-            if !seen.contains(&point) {
-                let byte = grid[point];
-                let mut region = Region::new(byte);
-                grid.flood_orthogonals(point, |_, p| {
-                    seen.insert(p);
-                    region.add_point(&grid, p);
-                });
-                regions.push(region);
-            }
-        }
-    }
-    let p1 = regions.iter().map(|r| r.p1_score()).sum();
-    let p2 = regions.iter().map(|r| r.p2_score()).sum();
+    let regions = grid.to_regions();
+    let p1 = regions.iter().map(|r| r.area() * r.perimeter()).sum();
+    let p2 = regions.iter().map(|r| r.area() * r.sides()).sum();
     (p1, p2)
 }
 

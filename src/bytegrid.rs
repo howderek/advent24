@@ -372,6 +372,26 @@ impl ByteGrid {
         total
     }
 
+    pub fn to_regions(&self) -> Vec<Region> {
+        let mut regions: Vec<Region> = vec![];
+        let mut seen: HashSet<Point> = HashSet::new();
+        for row in 0..self.height {
+            for col in 0..self.width {
+                let point = Point::new(row, col);
+                if !seen.contains(&point) {
+                    let byte = self[point];
+                    let mut region = Region::new(byte);
+                    self.flood_orthogonals(point, |_, p| {
+                        seen.insert(p);
+                        region.add_point(&self, p);
+                    });
+                    regions.push(region);
+                }
+            }
+        }
+        regions
+    }
+
     pub fn bfs_all(
         &self,
         root: Point,
@@ -489,6 +509,86 @@ impl Index<usize> for ByteGrid {
 impl IndexMut<usize> for ByteGrid {
     fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
         self.data.index_mut(idx)
+    }
+}
+
+#[derive(Debug)]
+pub struct Region {
+    byte: u8,
+    points: Vec<Point>,
+    min_row: i32,
+    max_row: i32,
+    min_col: i32,
+    max_col: i32,
+    area: i32,
+    sides: i32,
+    perimeter: i32,
+}
+
+impl Region {
+    pub fn new(byte: u8) -> Self {
+        Region {
+            byte: byte,
+            points: vec![],
+            min_row: i32::MAX,
+            max_row: 0,
+            min_col: i32::MAX,
+            max_col: 0,
+            area: 0,
+            sides: 0,
+            perimeter: 0,
+        }
+    }
+
+    pub fn add_point(&mut self, grid: &ByteGrid, point: Point) {
+        if point.row < self.min_row {
+            self.min_row = point.row;
+        }
+        if point.row > self.max_row {
+            self.max_row = point.row;
+        }
+        if point.col < self.min_col {
+            self.min_col = point.col;
+        }
+        if point.col > self.max_col {
+            self.max_col = point.col;
+        }
+        for adj in point.orthogonals() {
+            if let Some(p) = grid.get_point(adj) {
+                if *p != self.byte {
+                    self.perimeter += 1;
+                }
+            } else {
+                self.perimeter += 1;
+            }
+        }
+        for corner in point.corners() {
+            if grid.get_point(corner[0]) != Some(&self.byte)
+                && grid.get_point(corner[2]) != Some(&self.byte)
+            {
+                self.sides += 1;
+            } else if grid.get_point(corner[0]) == Some(&self.byte)
+                && grid.get_point(corner[2]) == Some(&self.byte)
+                && grid.get_point(corner[1]) != Some(&self.byte)
+            {
+                self.sides += 1;
+            }
+        }
+
+        self.area += 1;
+        self.points.push(point);
+    }
+
+    pub fn perimeter(&self) -> i32 {
+        self.perimeter
+    }
+
+    pub fn area(&self) -> i32 {
+        self.area
+    }
+
+    pub fn sides(&self) -> i32 {
+        self.sides
     }
 }
 
