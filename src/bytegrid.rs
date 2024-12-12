@@ -27,14 +27,23 @@ impl Point {
 
     pub fn adjacencies(self) -> [Point; 8] {
         [
-            self + NORTHWEST,
             self + NORTH,
             self + NORTHEAST,
             self + WEST,
-            self + EAST,
             self + SOUTHWEST,
             self + SOUTH,
             self + SOUTHEAST,
+            self + EAST,
+            self + NORTHWEST,
+        ]
+    }
+
+    pub fn corners(self) -> [[Point; 3]; 4] {
+        [
+            [self + NORTH, self + NORTHEAST, self + EAST],
+            [self + EAST, self + SOUTHEAST, self + SOUTH],
+            [self + SOUTH, self + SOUTHWEST, self + WEST],
+            [self + WEST, self + NORTHWEST, self + NORTH],
         ]
     }
 
@@ -244,6 +253,9 @@ impl ByteGrid {
     }
 
     pub fn get_point(&self, p: Point) -> Option<&u8> {
+        if !self.is_valid_point(p) {
+            return None;
+        }
         self.data.get(self.coord_to_idx(p.row, p.col))
     }
 
@@ -306,7 +318,7 @@ impl ByteGrid {
         total
     }
 
-    pub fn flood_orthogonals(
+    pub fn flood_orthogonals_mut(
         &mut self,
         start: Point,
         mut f: impl FnMut(&mut u8, Point) -> (),
@@ -330,6 +342,32 @@ impl ByteGrid {
                     }
                 }
             }
+        }
+        total
+    }
+
+    pub fn flood_orthogonals(&self, start: Point, mut f: impl FnMut(&u8, Point) -> ()) -> usize {
+        let start_u8 = match self.get_point(start) {
+            Some(c) => c.clone(),
+            None => return 0,
+        };
+        let mut visited: HashSet<Point> = HashSet::new();
+        let mut stack = vec![start];
+        let mut total = 0;
+        while let Some(point) = stack.pop() {
+            let c = &self[point];
+            if *c == start_u8 {
+                if !visited.contains(&point) {
+                    f(c, point);
+                }
+                total += 1;
+                for adj in point.orthogonals() {
+                    if self.is_valid_point(adj) && !visited.contains(&adj) {
+                        stack.push(adj);
+                    }
+                }
+            }
+            visited.insert(point);
         }
         total
     }
@@ -514,7 +552,7 @@ mod tests {
         assert_eq!(grid[0], b'!');
 
         let mut blah = 0;
-        let count = grid.flood_orthogonals(Point::new(2, 3), |c, p| {
+        let count = grid.flood_orthogonals_mut(Point::new(2, 3), |c, p| {
             if p.col == 4 {
                 blah += 1;
             }
@@ -570,7 +608,7 @@ mod tests {
         let mut grid = ByteGrid::new(FLOOD_TEST);
         b.iter(|| {
             let mut blah = 0;
-            grid.flood_orthogonals(Point::new(5, 5), |c, p| {
+            grid.flood_orthogonals_mut(Point::new(5, 5), |c, p| {
                 if p.col == 4 {
                     blah += 1;
                 }
