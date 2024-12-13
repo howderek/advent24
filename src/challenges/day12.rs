@@ -1,6 +1,6 @@
-use advent24::bytegrid::{ByteGrid, Point};
+use advent24::bytegrid::ByteGrid;
 use clap;
-use std::{collections::HashSet, fs, i32, str};
+use std::{fs, i32, str};
 
 #[derive(clap::Args, Debug)]
 pub struct Args {
