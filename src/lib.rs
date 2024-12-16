@@ -3,6 +3,8 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
+use clap::builder::Str;
+
 pub mod bytegrid;
 
 pub fn parse_number_list<T: std::str::FromStr>(s: &str) -> Vec<T> {
@@ -10,6 +12,20 @@ pub fn parse_number_list<T: std::str::FromStr>(s: &str) -> Vec<T> {
         .into_iter()
         .flat_map(|x| x.parse())
         .collect()
+}
+
+pub fn extract_numbers<T: std::str::FromStr>(s: &str) -> Vec<T> {
+    let new_s: String = s
+        .chars()
+        .filter_map(|c| {
+            if c.is_digit(10) || c == ' ' || c == '-' {
+                Some(c)
+            } else {
+                Some(' ')
+            }
+        })
+        .collect();
+    parse_number_list(&new_s)
 }
 
 pub fn parse_number_list_delimited_by<T: std::str::FromStr>(s: &str, delim: &str) -> Vec<T> {

@@ -216,6 +216,14 @@ impl ByteGrid {
         }
     }
 
+    pub fn new_empty(fill: u8, width: i32, height: i32) -> Self {
+        Self {
+            width: width as i32,
+            height: height as i32,
+            data: vec![fill; (width * height) as usize],
+        }
+    }
+
     #[inline]
     pub fn coord_to_idx(&self, row: i32, col: i32) -> usize {
         (row * self.width + col) as usize
