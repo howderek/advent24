@@ -1,15 +1,13 @@
-#![feature(test)]
+#![feature(test, extract_if)]
 
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use clap::builder::Str;
 
 pub mod bytegrid;
 
 pub fn parse_number_list<T: std::str::FromStr>(s: &str) -> Vec<T> {
     s.split_whitespace()
-        .into_iter()
         .flat_map(|x| x.parse())
         .collect()
 }
@@ -18,7 +16,7 @@ pub fn extract_numbers<T: std::str::FromStr>(s: &str) -> Vec<T> {
     let new_s: String = s
         .chars()
         .filter_map(|c| {
-            if c.is_digit(10) || c == ' ' || c == '-' {
+            if c.is_ascii_digit() || c == ' ' || c == '-' {
                 Some(c)
             } else {
                 Some(' ')
@@ -29,7 +27,7 @@ pub fn extract_numbers<T: std::str::FromStr>(s: &str) -> Vec<T> {
 }
 
 pub fn parse_number_list_delimited_by<T: std::str::FromStr>(s: &str, delim: &str) -> Vec<T> {
-    s.split(delim).into_iter().flat_map(|x| x.parse()).collect()
+    s.split(delim).flat_map(|x| x.parse()).collect()
 }
 
 pub fn string_to_2d_array(s: String) -> Vec<Vec<char>> {
@@ -74,12 +72,9 @@ pub fn dfs<T: Hash + Eq + Copy>(
                             result.push(*node);
                         }
                         stack.push((NodeOp::Mark, node));
-                        match graph.get(node) {
-                            Some(sucessors) => stack.extend(
-                                sucessors.iter().map(|successor| (NodeOp::Visit, successor)),
-                            ),
-                            _ => (),
-                        }
+                        if let Some(sucessors) = graph.get(node) { stack.extend(
+                            sucessors.iter().map(|successor| (NodeOp::Visit, successor)),
+                        ) }
                     }
                 },
                 NodeOp::Mark => {
@@ -142,56 +137,56 @@ impl Tile {
         if self.x > 0 && self.y > 0 {
             return Some(Self::new(self.w, self.h, self.x - 1, self.y - 1));
         }
-        return None;
+        None
     }
 
     pub fn top(&self) -> Option<Self> {
         if self.y > 0 {
             return Some(Self::new(self.w, self.h, self.x, self.y - 1));
         }
-        return None;
+        None
     }
 
     pub fn topright(&self) -> Option<Self> {
         if self.x + 1 < self.w && self.y > 0 {
             return Some(Self::new(self.w, self.h, self.x + 1, self.y - 1));
         }
-        return None;
+        None
     }
 
     pub fn left(&self) -> Option<Self> {
         if self.x > 0 {
             return Some(Self::new(self.w, self.h, self.x - 1, self.y));
         }
-        return None;
+        None
     }
 
     pub fn right(&self) -> Option<Self> {
         if self.x + 1 < self.w {
             return Some(Self::new(self.w, self.h, self.x + 1, self.y));
         }
-        return None;
+        None
     }
 
     pub fn bottomleft(&self) -> Option<Self> {
         if self.x > 0 && self.y + 1 < self.h {
             return Some(Self::new(self.w, self.h, self.x - 1, self.y + 1));
         }
-        return None;
+        None
     }
 
     pub fn bottom(&self) -> Option<Self> {
         if self.y + 1 < self.h {
             return Some(Self::new(self.w, self.h, self.x, self.y + 1));
         }
-        return None;
+        None
     }
 
     pub fn bottomright(&self) -> Option<Self> {
         if self.x + 1 < self.w && self.y + 1 < self.h {
             return Some(Self::new(self.w, self.h, self.x + 1, self.y + 1));
         }
-        return None;
+        None
     }
 
     pub fn orthogonal(&self) -> Vec<Self> {

@@ -77,9 +77,9 @@ impl ClawMachine {
             self.button_a.1 * a_buttons + self.button_b.1 * b_buttons,
         ) == (self.prize.0, self.prize.1)
         {
-            return a_buttons * 3 + b_buttons;
+            a_buttons * 3 + b_buttons
         } else {
-            return 0;
+            0
         }
     }
 }
@@ -91,19 +91,19 @@ pub fn parse(input: &str) -> Vec<ClawMachine> {
             .next()
             .unwrap()
             .chars()
-            .filter(|c| c.is_digit(10) || *c == ' ')
+            .filter(|c| c.is_ascii_digit() || *c == ' ')
             .collect();
         let button_b_str: String = game_desc
             .next()
             .unwrap()
             .chars()
-            .filter(|c| c.is_digit(10) || *c == ' ')
+            .filter(|c| c.is_ascii_digit() || *c == ' ')
             .collect();
         let prize_str: String = game_desc
             .next()
             .unwrap()
             .chars()
-            .filter(|c| c.is_digit(10) || *c == ' ')
+            .filter(|c| c.is_ascii_digit() || *c == ' ')
             .collect();
         let a_params = parse_number_list(&button_a_str);
         let b_params = parse_number_list(&button_b_str);
@@ -172,6 +172,6 @@ Prize: X=18641, Y=10279
 
     #[test]
     fn test_day9() {
-        assert_eq!(part1(&TEST_GRID), 480);
+        assert_eq!(part1(TEST_GRID), 480);
     }
 }

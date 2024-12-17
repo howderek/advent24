@@ -1,10 +1,7 @@
-use advent24::{bytegrid::ByteGrid, extract_numbers, parse_number_list};
+use advent24::{bytegrid::ByteGrid, extract_numbers};
 use clap;
-use itertools::Itertools;
 use std::{
     fs,
-    fs::File,
-    i128,
     io::Write,
     str::{self, FromStr},
 };
@@ -30,11 +27,11 @@ impl Robot {
     pub fn pos_after(&self, t: i32, w: i32, h: i32) -> (i32, i32) {
         let mut x = (self.x + (self.dx * t)) % w;
         if x < 0 {
-            x = w + x;
+            x += w;
         }
         let mut y = (self.y + (self.dy * t)) % h;
         if y < 0 {
-            y = h + y
+            y += h
         }
         (x, y)
     }
@@ -136,6 +133,6 @@ p=9,5 v=-3,-3
 
     #[test]
     fn test_day9() {
-        assert_eq!(part1(&TEST_GRID, 11, 7), 12);
+        assert_eq!(part1(TEST_GRID, 11, 7), 12);
     }
 }

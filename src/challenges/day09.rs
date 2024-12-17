@@ -57,7 +57,7 @@ pub fn score_fs(fs: &Vec<Block>) -> usize {
 }
 
 pub fn part1(input: &str) -> usize {
-    let fs = parse_puzzle(&input);
+    let fs = parse_puzzle(input);
     let mut new_fs: Vec<Block> = vec![];
     let fwd_iter = fs.iter();
     let mut rev_iter = fs.iter().rev();
@@ -78,7 +78,7 @@ pub fn part1(input: &str) -> usize {
                     break;
                 }
                 if let Block::File { id } = *rev_iter.next().unwrap() {
-                    new_fs.push(Block::File { id: id });
+                    new_fs.push(Block::File { id });
                     total_i += 2;
                 }
             }
@@ -120,10 +120,8 @@ impl Defragmenter {
             if i % 2 == 0 {
                 s.files.push(File { id, pos, size });
                 id += 1;
-            } else {
-                if size > 0 {
-                    s.gap_to_pos[size - 1].push(Reverse(pos));
-                }
+            } else if size > 0 {
+                s.gap_to_pos[size - 1].push(Reverse(pos));
             }
             pos += size;
         }
@@ -193,54 +191,54 @@ mod tests {
 
     #[test]
     fn test_day9_part1() {
-        let p1 = part1(&TEST_GRID);
+        let p1 = part1(TEST_GRID);
         assert_eq!(p1, 1928);
     }
 
     #[test]
     fn test_day9_part2() {
-        assert_eq!(part2(&TEST_GRID), 2858);
+        assert_eq!(part2(TEST_GRID), 2858);
 
         // correct scoring for ids > 9
-        assert_eq!(part2(&"1010101010101010101010"), 385);
+        assert_eq!(part2("1010101010101010101010"), 385);
 
         // 0.1 -> 01. (simplest move)
-        assert_eq!(part2(&"111"), 1);
+        assert_eq!(part2("111"), 1);
 
         // 0.........1 -> 01......... (simplest move, max space)
-        assert_eq!(part2(&"191"), 1);
+        assert_eq!(part2("191"), 1);
 
         // 0..11 -> 011..
-        assert_eq!(part2(&"122"), 3);
+        assert_eq!(part2("122"), 3);
 
         // 0.12 -> 021.
-        assert_eq!(part2(&"11101"), 4);
+        assert_eq!(part2("11101"), 4);
 
         // 0...12 -> 021...
-        assert_eq!(part2(&"13101"), 4);
+        assert_eq!(part2("13101"), 4);
 
         // 00..11..22 -> 002211....
-        assert_eq!(part2(&"22222"), 19);
+        assert_eq!(part2("22222"), 19);
 
         // 00..1.2.3 -> 00321....
-        assert_eq!(part2(&"2211111"), 16);
+        assert_eq!(part2("2211111"), 16);
 
         // 00..1.2.33.4 -> 00421...33..
-        assert_eq!(part2(&"221111211"), 69);
+        assert_eq!(part2("221111211"), 69);
 
         // 0..1.22...333 -> 0221...333...
-        assert_eq!(part2(&"1211233"), 81);
+        assert_eq!(part2("1211233"), 81);
 
         // 00.....11 -> 0011.....
-        assert_eq!(part2(&"252"), 5);
+        assert_eq!(part2("252"), 5);
 
         // 0.1.2.3 -> 0312..
-        assert_eq!(part2(&"1111111"), 11);
+        assert_eq!(part2("1111111"), 11);
 
         // 0...1223 -> 03221...
-        assert_eq!(part2(&"1310201"), 17);
+        assert_eq!(part2("1310201"), 17);
 
-        assert_eq!(part2(&"354631466260"), 1325);
-        assert_eq!(part2(&"171010402"), 88);
+        assert_eq!(part2("354631466260"), 1325);
+        assert_eq!(part2("171010402"), 88);
     }
 }

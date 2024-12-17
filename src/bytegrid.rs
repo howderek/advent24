@@ -135,7 +135,7 @@ impl<'a> ByteGridIter<'a> {
     }
 }
 
-impl<'a> Iterator for ByteGridIter<'a> {
+impl Iterator for ByteGridIter<'_> {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -147,7 +147,7 @@ impl<'a> Iterator for ByteGridIter<'a> {
         if self.col < 0 || self.col >= self.grid.width {
             return None;
         }
-        return Some(self.grid.data[(self.row * self.grid.width + self.col) as usize]);
+        Some(self.grid.data[(self.row * self.grid.width + self.col) as usize])
     }
 }
 
@@ -195,7 +195,7 @@ impl<'a> Iterator for ByteGridIterMut<'a> {
         }
         unsafe {
             let ptr = self.grid.data.as_mut_ptr();
-            return Some(&mut *ptr.add(idx));
+            Some(&mut *ptr.add(idx))
         }
     }
 }
@@ -212,14 +212,14 @@ impl ByteGrid {
         Self {
             width: width as i32,
             height: height as i32,
-            data: data,
+            data,
         }
     }
 
     pub fn new_empty(fill: u8, width: i32, height: i32) -> Self {
         Self {
-            width: width as i32,
-            height: height as i32,
+            width,
+            height,
             data: vec![fill; (width * height) as usize],
         }
     }
@@ -287,7 +287,7 @@ impl ByteGrid {
         for (i, c) in self.data.iter().enumerate() {
             bytes_to_points
                 .entry(*c)
-                .or_insert_with(|| vec![])
+                .or_default()
                 .push(self.idx_to_point(i));
         }
         bytes_to_points
@@ -298,13 +298,9 @@ impl ByteGrid {
         0 <= p.row && p.row < self.height && 0 <= p.col && p.col < self.width
     }
 
-    pub fn flood_adjacencies(
-        &mut self,
-        start: Point,
-        mut f: impl FnMut(&mut u8, Point) -> (),
-    ) -> usize {
+    pub fn flood_adjacencies(&mut self, start: Point, mut f: impl FnMut(&mut u8, Point)) -> usize {
         let start_u8 = match self.get_point_mut(start) {
-            Some(c) => c.clone(),
+            Some(c) => *c,
             None => return 0,
         };
         let mut visited: HashSet<Point> = HashSet::new();
@@ -329,10 +325,10 @@ impl ByteGrid {
     pub fn flood_orthogonals_mut(
         &mut self,
         start: Point,
-        mut f: impl FnMut(&mut u8, Point) -> (),
+        mut f: impl FnMut(&mut u8, Point),
     ) -> usize {
         let start_u8 = match self.get_point_mut(start) {
-            Some(c) => c.clone(),
+            Some(c) => *c,
             None => return 0,
         };
         let mut visited: HashSet<Point> = HashSet::new();
@@ -354,9 +350,9 @@ impl ByteGrid {
         total
     }
 
-    pub fn flood_orthogonals(&self, start: Point, mut f: impl FnMut(&u8, Point) -> ()) -> usize {
+    pub fn flood_orthogonals(&self, start: Point, mut f: impl FnMut(&u8, Point)) -> usize {
         let start_u8 = match self.get_point(start) {
-            Some(c) => c.clone(),
+            Some(c) => *c,
             None => return 0,
         };
         let mut visited: HashSet<Point> = HashSet::new();
@@ -391,7 +387,7 @@ impl ByteGrid {
                     let mut region = Region::new(byte);
                     self.flood_orthogonals(point, |_, p| {
                         seen.insert(p);
-                        region.add_point(&self, p);
+                        region.add_point(self, p);
                     });
                     regions.push(region);
                 }
@@ -433,7 +429,7 @@ impl ByteGrid {
                 return None;
             }
         }
-        return Some(result);
+        Some(result)
     }
 
     // Directional iterators
@@ -536,7 +532,7 @@ pub struct Region {
 impl Region {
     pub fn new(byte: u8) -> Self {
         Region {
-            byte: byte,
+            byte,
             points: vec![],
             min_row: i32::MAX,
             max_row: 0,
@@ -571,13 +567,11 @@ impl Region {
             }
         }
         for corner in point.corners() {
-            if grid.get_point(corner[0]) != Some(&self.byte)
-                && grid.get_point(corner[2]) != Some(&self.byte)
-            {
-                self.sides += 1;
-            } else if grid.get_point(corner[0]) == Some(&self.byte)
-                && grid.get_point(corner[2]) == Some(&self.byte)
-                && grid.get_point(corner[1]) != Some(&self.byte)
+            if (grid.get_point(corner[0]) != Some(&self.byte)
+                && grid.get_point(corner[2]) != Some(&self.byte))
+                || (grid.get_point(corner[0]) == Some(&self.byte)
+                    && grid.get_point(corner[2]) == Some(&self.byte)
+                    && grid.get_point(corner[1]) != Some(&self.byte))
             {
                 self.sides += 1;
             }

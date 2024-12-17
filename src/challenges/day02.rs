@@ -36,7 +36,7 @@ impl PlantState {
 fn part1(input: String) -> i64 {
     let mut safe = 0;
     for line in input.lines() {
-        let digits: Vec<i64> = parse_number_list(&line);
+        let digits: Vec<i64> = parse_number_list(line);
         let state = digits[1..]
             .iter()
             .fold(PlantState::Initial(digits[0]), |s, item| {
@@ -53,7 +53,7 @@ fn part1(input: String) -> i64 {
 fn part2(input: String) -> i64 {
     let mut safe = 0;
     for line in input.lines() {
-        let digits: Vec<i64> = parse_number_list(&line);
+        let digits: Vec<i64> = parse_number_list(line);
         for one_to_skip in 0..digits.len() {
             let mut new_digits = vec![];
             for (i, n) in digits.iter().enumerate() {
@@ -77,11 +77,9 @@ fn part2(input: String) -> i64 {
 
 pub fn entrypoint(args: &Args) {
     let input = fs::read_to_string(&args.file).expect("I/O error");
-    let result: i64;
-    if args.part2 {
-        result = part2(input);
-    } else {
-        result = part1(input);
-    }
+    let result: i64 = match args.part2 {
+        true => part2(input),
+        false => part1(input),
+    };
     println!("{}", result);
 }

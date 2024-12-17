@@ -49,7 +49,7 @@ pub fn part1(input: &str) -> u64 {
     for _ in 0..25 {
         stone_map = blink(stone_map);
     }
-    stone_map.values().sum::<u64>() as u64
+    stone_map.values().sum::<u64>()
 }
 
 pub fn part2(input: &str) -> u64 {
@@ -61,7 +61,7 @@ pub fn part2(input: &str) -> u64 {
     for _ in 0..75 {
         stone_map = blink(stone_map);
     }
-    stone_map.values().sum::<u64>() as u64
+    stone_map.values().sum::<u64>()
 }
 
 pub fn entrypoint(args: &Args) {
@@ -81,6 +81,6 @@ mod tests {
 
     #[test]
     fn test_day11() {
-        assert_eq!(part1(&"125 17"), 55312);
+        assert_eq!(part1("125 17"), 55312);
     }
 }

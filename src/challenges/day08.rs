@@ -13,7 +13,7 @@ pub struct Args {
 }
 
 pub fn solver(input: &str, skip: usize, take: usize) -> usize {
-    let mut world = ByteGrid::new(&input);
+    let mut world = ByteGrid::new(input);
     let mut bytes_to_points = world.bytes_to_points();
     bytes_to_points.remove(&b'.');
     for point_vec in bytes_to_points.values() {
@@ -39,7 +39,7 @@ pub fn solver(input: &str, skip: usize, take: usize) -> usize {
             }
         }
     }
-    return world.count(b'#');
+    world.count(b'#')
 }
 
 pub fn entrypoint(args: &Args) {
@@ -68,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_day8() {
-        assert_eq!(solver(&TEST_GRID, 1, 1), 14);
-        assert_eq!(solver(&TEST_GRID, 0, 100), 34);
+        assert_eq!(solver(TEST_GRID, 1, 1), 14);
+        assert_eq!(solver(TEST_GRID, 0, 100), 34);
     }
 }

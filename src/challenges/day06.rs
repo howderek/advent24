@@ -45,7 +45,7 @@ impl Character {
             match world[tile.y][tile.x] {
                 '#' | 'O' => {
                     self.rotate_right();
-                    return Some(0);
+                    Some(0)
                 }
                 '.' | '1' | '2' | '3' | '4' => {
                     let mut tile_visited = 0;
@@ -70,20 +70,20 @@ impl Character {
                         _ => return None,
                     }
                     self.current_pos = tile;
-                    return Some(tile_visited);
+                    Some(tile_visited)
                 }
-                _ => return None,
+                _ => None,
             }
         } else {
             world[self.current_pos.y][self.current_pos.x] = 'X';
-            return None;
+            None
         }
     }
 }
 
 pub fn run_simulation(world: &mut Vec<Vec<char>>) -> u64 {
     let mut character = Character {
-        current_pos: Tile::from_world(&world, 0, 0),
+        current_pos: Tile::from_world(world, 0, 0),
         next_step: Tile::top,
     };
     'outer: for (y, line) in world.iter().enumerate() {

@@ -25,7 +25,7 @@ fn extract_lists(input: String) -> (Vec<i64>, Vec<i64>) {
     (left_list, right_list)
 }
 
-fn vec_to_counts(v: &Vec<i64>) -> HashMap<i64, i64> {
+fn vec_to_counts(v: &[i64]) -> HashMap<i64, i64> {
     let mut res = HashMap::new();
 
     for k in v.iter() {
@@ -62,12 +62,10 @@ fn part2(input: String) -> Option<i64> {
 
 pub fn entrypoint(args: &Args) {
     let input = fs::read_to_string(&args.file).expect("I/O error");
-    let result: Option<i64>;
-    if args.part2 {
-        result = part2(input);
-    } else {
-        result = part1(input);
-    }
+    let result: Option<i64> = match args.part2 {
+        true => part2(input),
+        false => part1(input),
+    };
     match result {
         Some(count) => println!("{}", count),
         None => println!("No digits found"),

@@ -14,8 +14,8 @@ pub struct Args {
 pub fn part1(args: &Args) -> u64 {
     let input = fs::read_to_string(&args.file).expect("I/O error");
     let mut world = string_to_2d_array(input);
-    let count = find_word_any_direction(&mut world, "XMAS");
-    count
+    
+    find_word_any_direction(&mut world, "XMAS")
 }
 
 fn check_direction(
@@ -45,9 +45,9 @@ fn check_direction(
         t = next_tile;
     }
     if len_checked == word.len() {
-        return 1;
+        1
     } else {
-        return 0;
+        0
     }
 }
 

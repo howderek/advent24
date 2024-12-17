@@ -75,12 +75,12 @@ AA.";
 
     #[test]
     fn test_day12() {
-        assert_eq!(solve(&SMOL_EXAMPLE), (140, 80));
-        assert_eq!(solve(&LARGER_EXAMPLE), (1930, 1206));
-        assert_eq!(solve(&ESHAPED_EXAMPLE).1, 236);
-        assert_eq!(solve(&THIRD_EXAMPLE).1, 368);
-        assert_eq!(solve(&"AA\nAB").1, 22);
-        assert_eq!(solve(&CROSS).1, 76);
-        assert_eq!(solve(&DIAG).1, 48);
+        assert_eq!(solve(SMOL_EXAMPLE), (140, 80));
+        assert_eq!(solve(LARGER_EXAMPLE), (1930, 1206));
+        assert_eq!(solve(ESHAPED_EXAMPLE).1, 236);
+        assert_eq!(solve(THIRD_EXAMPLE).1, 368);
+        assert_eq!(solve("AA\nAB").1, 22);
+        assert_eq!(solve(CROSS).1, 76);
+        assert_eq!(solve(DIAG).1, 48);
     }
 }

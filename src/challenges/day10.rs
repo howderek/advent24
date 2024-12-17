@@ -75,6 +75,6 @@ mod tests {
 
     #[test]
     fn test_day9() {
-        assert_eq!(solve(&TEST_GRID), (36, 81));
+        assert_eq!(solve(TEST_GRID), (36, 81));
     }
 }

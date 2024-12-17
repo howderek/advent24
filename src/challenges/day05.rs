@@ -19,7 +19,7 @@ pub fn parse_graph(s: &str) -> HashMap<u64, Vec<u64>> {
         let split: Vec<&str> = line.split('|').collect();
         if split.len() == 2 {
             res.entry(split[1].parse().unwrap())
-                .or_insert_with(|| vec![])
+                .or_default()
                 .push(split[0].parse().unwrap());
         }
     }
@@ -40,17 +40,14 @@ pub fn entrypoint(args: &Args) {
     for update in updates.iter() {
         let mut is_valid = true;
         'outer: for (i, n) in update.iter().enumerate() {
-            match graph.get(n) {
-                Some(req_predecessors) => {
-                    let actual_predecessors = &update[..i + 1];
-                    for p in req_predecessors.iter() {
-                        if update.contains(p) && !actual_predecessors.contains(p) {
-                            is_valid = false;
-                            break 'outer;
-                        }
+            if let Some(req_predecessors) = graph.get(n) {
+                let actual_predecessors = &update[..i + 1];
+                for p in req_predecessors.iter() {
+                    if update.contains(p) && !actual_predecessors.contains(p) {
+                        is_valid = false;
+                        break 'outer;
                     }
                 }
-                _ => (),
             }
         }
         if is_valid {
@@ -60,19 +57,16 @@ pub fn entrypoint(args: &Args) {
             println!("invalid: {:?}", update);
             let mut correct: Vec<u64> = update.clone();
             correct.sort_by(|a, b| {
-                match graph.get(a) {
-                    Some(preds) => {
-                        if preds.contains(b) {
-                            return Ordering::Greater;
-                        }
+                if let Some(preds) = graph.get(a) {
+                    if preds.contains(b) {
+                        return Ordering::Greater;
                     }
-                    None => (),
                 }
                 match graph.get(b) {
                     Some(preds) if preds.contains(a) => {
-                        return Ordering::Less;
+                        Ordering::Less
                     }
-                    _ => return Ordering::Equal,
+                    _ => Ordering::Equal,
                 }
             });
             println!("corrected: {:?}", correct);
