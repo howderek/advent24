@@ -6,6 +6,7 @@ use clap;
 use itertools::Itertools;
 use std::{
     fs,
+    iter::zip,
     str::{self, FromStr},
 };
 
@@ -19,19 +20,15 @@ pub struct Args {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Operand {
-    Literal(u32),
-    Register(u32),
+pub enum Operand {
+    Literal(u64),
+    Register(u64),
     Reserved,
     Invalid,
 }
 
 impl Operand {
-    pub fn literal(input: u32) -> Self {
-        Self::Literal(input)
-    }
-
-    pub fn combo(input: u32) -> Self {
+    pub fn combo(input: u64) -> Self {
         match input {
             0..=3 => Self::Literal(input),
             4..=6 => Self::Register(input - 4),
@@ -41,21 +38,12 @@ impl Operand {
     }
 }
 
-enum Instruction {
-    Divide(Operand, Operand),
-    BitwiseOrB(Operand),
-    ModEight(Operand),
-    Jump(Operand),
-    Bxc(Operand),
-    Out(Operand),
-}
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Computer {
-    pub program: Vec<u32>,
-    pub output: Vec<u32>,
+    pub program: Vec<u64>,
+    pub output: Vec<u64>,
     pub i: usize,
-    pub registers: [u32; 3],
+    pub registers: [u64; 3],
 }
 
 static REG_A: usize = 0;
@@ -63,7 +51,7 @@ static REG_B: usize = 1;
 static REG_C: usize = 2;
 
 impl Computer {
-    pub fn new(program: Vec<u32>, registers: [u32; 3]) -> Self {
+    pub fn new(program: Vec<u64>, registers: [u64; 3]) -> Self {
         Computer {
             program,
             output: vec![],
@@ -74,10 +62,10 @@ impl Computer {
 
     pub fn parse(input: &str) -> Self {
         let lines: Vec<&str> = input.lines().collect();
-        let program: Vec<u32> = lines[4]
+        let program: Vec<u64> = lines[4]
             .replace("Program: ", "")
             .split(",")
-            .filter_map(|c| c.chars().next().unwrap().to_digit(10))
+            .map(|c| c.chars().next().unwrap().to_digit(10).unwrap() as u64)
             .collect();
         Computer::new(
             program,
@@ -89,7 +77,7 @@ impl Computer {
         )
     }
 
-    pub fn operand_to_value(&mut self, op: Operand) -> u32 {
+    pub fn operand_to_value(&mut self, op: Operand) -> u64 {
         match op {
             Operand::Literal(v) => v,
             Operand::Register(r) if r < 3 => self.registers[r as usize],
@@ -110,7 +98,7 @@ impl Computer {
                 // The adv instruction (opcode 0) performs division. The numerator is the value in the A register.
                 // The denominator is found by raising 2 to the power of the instruction's combo operand.
                 let op = Operand::combo(self.program[self.i + 1]);
-                self.registers[REG_A] /= u32::pow(2, self.operand_to_value(op));
+                self.registers[REG_A] /= u64::pow(2, self.operand_to_value(op) as u32);
                 self.i += 2;
             }
             1 => {
@@ -156,7 +144,7 @@ impl Computer {
                 // the result is stored in the B register. (The numerator is still read from the A register.)
                 let op = Operand::combo(self.program[self.i + 1]);
                 self.registers[REG_B] =
-                    self.registers[REG_A] / u32::pow(2, self.operand_to_value(op));
+                    self.registers[REG_A] / u64::pow(2, self.operand_to_value(op) as u32);
                 self.i += 2;
             }
             7 => {
@@ -164,7 +152,7 @@ impl Computer {
                 // the result is stored in the C register. (The numerator is still read from the A register.)
                 let op = Operand::combo(self.program[self.i + 1]);
                 self.registers[REG_C] =
-                    self.registers[REG_A] / u32::pow(2, self.operand_to_value(op));
+                    self.registers[REG_A] / u64::pow(2, self.operand_to_value(op) as u32);
                 self.i += 2;
             }
             _ => unreachable!(),
@@ -195,7 +183,7 @@ impl Computer {
                 // The adv instruction (opcode 0) performs division. The numerator is the value in the A register.
                 // The denominator is found by raising 2 to the power of the instruction's combo operand.
                 let op = Operand::combo(self.program[self.i + 1]);
-                let denom = u32::pow(2, self.operand_to_value(op));
+                let denom = u64::pow(2, self.operand_to_value(op) as u32);
                 println!(
                     "adv {:?} ({}): storing {} == {} / {} in A",
                     op,
@@ -279,7 +267,7 @@ impl Computer {
                 // The bdv instruction (opcode 6) works exactly like the adv instruction except that
                 // the result is stored in the B register. (The numerator is still read from the A register.)
                 let op = Operand::combo(self.program[self.i + 1]);
-                let denom = u32::pow(2, self.operand_to_value(op));
+                let denom = u64::pow(2, self.operand_to_value(op) as u32);
                 println!(
                     "bdv {:?} ({}): storing {} == {} / {} in B",
                     op,
@@ -289,14 +277,14 @@ impl Computer {
                     denom
                 );
                 self.registers[REG_B] =
-                    self.registers[REG_A] / u32::pow(2, self.operand_to_value(op));
+                    self.registers[REG_A] / u64::pow(2, self.operand_to_value(op) as u32);
                 self.i += 2;
             }
             7 => {
                 // The cdv instruction (opcode 7) works exactly like the adv instruction except that
                 // the result is stored in the C register. (The numerator is still read from the A register.)
                 let op = Operand::combo(self.program[self.i + 1]);
-                let denom = u32::pow(2, self.operand_to_value(op));
+                let denom = u64::pow(2, self.operand_to_value(op) as u32);
                 println!(
                     "cdv {:?} ({}): storing {} == {} / {} in C",
                     op,
@@ -306,7 +294,7 @@ impl Computer {
                     denom
                 );
                 self.registers[REG_C] =
-                    self.registers[REG_A] / u32::pow(2, self.operand_to_value(op));
+                    self.registers[REG_A] / u64::pow(2, self.operand_to_value(op) as u32);
                 self.i += 2;
             }
             _ => unreachable!(),
@@ -316,18 +304,54 @@ impl Computer {
     }
 
     pub fn execute_to_end(&mut self) {
-        while self.execute_verbose() {}
+        while self.execute() {}
+    }
+
+    pub fn reset(&mut self, registers: [u64; 3]) {
+        self.registers = registers;
+        self.i = 0;
+        self.output.clear();
     }
 }
 
 pub fn part1(input: &str) -> String {
     let mut computer = Computer::parse(input);
     while computer.execute_verbose() {}
-    computer.output.iter().join("")
+    computer.output.iter().join(",")
 }
 
 pub fn part2(input: &str) -> String {
-    "".to_string()
+    let orig_computer = Computer::parse(input);
+    let mut computer = orig_computer.clone();
+    let desired: [u64; 16] = [2, 4, 1, 1, 7, 5, 0, 3, 1, 4, 4, 4, 5, 5, 3, 0];
+    // i started out with all zeros and as I got better sim scores I added to the
+    // the right side of this
+    let mut input: [u64; 16] = [5, 0, 0, 0, 0, 3, 2, 7, 5, 6, 0, 2, 5, 0, 5, 2];
+    let mut base = 0;
+    let mut most_similar = 0;
+    for j in &input {
+        base <<= 3;
+        base |= j;
+    }
+    for i in 0..u64::pow(8, 8) {
+        let reg_a = base | (i << 33);
+        computer.reset([reg_a, 0, 0]);
+        computer.execute_to_end();
+        if computer.output == desired {
+            return format!("{reg_a}");
+        }
+        let similarity_score: u64 = zip(computer.output.iter(), desired.iter())
+            .map(|(a, b)| if a == b { 1 } else { 0 })
+            .sum();
+        if similarity_score > most_similar {
+            most_similar = similarity_score;
+            println!(
+                "{reg_a:016b} {:?} sim_score={}",
+                computer.output, similarity_score
+            )
+        }
+    }
+    "not found".to_string()
 }
 
 pub fn entrypoint(args: &Args) {
