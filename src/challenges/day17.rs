@@ -1,14 +1,7 @@
-use advent24::{
-    bytegrid::{ByteGrid, Point, EAST, NORTH, SOUTH, WEST},
-    extract_numbers,
-};
+use advent24::extract_numbers;
 use clap;
 use itertools::Itertools;
-use std::{
-    fs,
-    iter::zip,
-    str::{self, FromStr},
-};
+use std::{fs, iter::zip, str};
 
 #[derive(clap::Args, Debug)]
 pub struct Args {
@@ -326,7 +319,7 @@ pub fn part2(input: &str) -> String {
     let desired: [u64; 16] = [2, 4, 1, 1, 7, 5, 0, 3, 1, 4, 4, 4, 5, 5, 3, 0];
     // i started out with all zeros and as I got better sim scores I added to the
     // the right side of this
-    let mut input: [u64; 16] = [5, 0, 0, 0, 0, 3, 2, 7, 5, 6, 0, 2, 5, 0, 5, 2];
+    let input: [u64; 16] = [5, 0, 0, 0, 0, 3, 2, 7, 5, 6, 0, 2, 5, 0, 5, 2];
     let mut base = 0;
     let mut most_similar = 0;
     for j in &input {
@@ -337,9 +330,6 @@ pub fn part2(input: &str) -> String {
         let reg_a = base | (i << 33);
         computer.reset([reg_a, 0, 0]);
         computer.execute_to_end();
-        if computer.output == desired {
-            return format!("{reg_a}");
-        }
         let similarity_score: u64 = zip(computer.output.iter(), desired.iter())
             .map(|(a, b)| if a == b { 1 } else { 0 })
             .sum();
@@ -349,6 +339,9 @@ pub fn part2(input: &str) -> String {
                 "{reg_a:016b} {:?} sim_score={}",
                 computer.output, similarity_score
             )
+        }
+        if computer.output == desired {
+            return format!("{reg_a}");
         }
     }
     "not found".to_string()

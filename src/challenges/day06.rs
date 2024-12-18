@@ -14,6 +14,7 @@ pub struct Args {
 struct Character {
     pub current_pos: Tile,
     pub next_step: fn(&Tile) -> Option<Tile>,
+    pub next_step_char: char,
 }
 
 impl Character {
@@ -28,19 +29,23 @@ impl Character {
     }
 
     fn rotate_right(&mut self) -> &mut Self {
-        if self.next_step == Tile::top {
+        if self.next_step_char == '^' {
             self.next_step = Tile::right;
-        } else if self.next_step == Tile::right {
+            self.next_step_char = '>';
+        } else if self.next_step_char == '>' {
             self.next_step = Tile::bottom;
-        } else if self.next_step == Tile::bottom {
+            self.next_step_char = 'v';
+        } else if self.next_step_char == 'v' {
             self.next_step = Tile::left;
-        } else if self.next_step == Tile::left {
+            self.next_step_char = '<';
+        } else if self.next_step_char == '<' {
             self.next_step = Tile::top;
+            self.next_step_char = '^';
         }
         self
     }
 
-    fn take_step(&mut self, world: &mut Vec<Vec<char>>) -> Option<u64> {
+    fn take_step(&mut self, world: &mut [Vec<char>]) -> Option<u64> {
         if let Some(tile) = (self.next_step)(&self.current_pos) {
             match world[tile.y][tile.x] {
                 '#' | 'O' => {
@@ -81,10 +86,11 @@ impl Character {
     }
 }
 
-pub fn run_simulation(world: &mut Vec<Vec<char>>) -> u64 {
+pub fn run_simulation(world: &mut [Vec<char>]) -> u64 {
     let mut character = Character {
         current_pos: Tile::from_world(world, 0, 0),
         next_step: Tile::top,
+        next_step_char: '^',
     };
     'outer: for (y, line) in world.iter().enumerate() {
         for (x, c) in line.iter().enumerate() {

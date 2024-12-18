@@ -1,6 +1,4 @@
-use advent24::bytegrid::{
-    ByteGrid, Point, EAST, NORTH, SOUTH, WEST,
-};
+use advent24::bytegrid::{ByteGrid, Point, EAST, NORTH, SOUTH, WEST};
 use clap;
 use std::{fs, str};
 
@@ -79,10 +77,6 @@ pub fn part1(input: &str) -> i32 {
         score += 100 * p.row + p.col;
     }
     score
-}
-
-pub struct Pushable {
-    pub points: Vec<Point>,
 }
 
 pub fn push_vert(world: &mut ByteGrid, from: Point, direction: Point) -> bool {

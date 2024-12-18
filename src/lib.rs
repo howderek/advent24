@@ -3,23 +3,20 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-
 pub mod bytegrid;
 
 pub fn parse_number_list<T: std::str::FromStr>(s: &str) -> Vec<T> {
-    s.split_whitespace()
-        .flat_map(|x| x.parse())
-        .collect()
+    s.split_whitespace().flat_map(|x| x.parse()).collect()
 }
 
 pub fn extract_numbers<T: std::str::FromStr>(s: &str) -> Vec<T> {
     let new_s: String = s
         .chars()
-        .filter_map(|c| {
+        .map(|c| {
             if c.is_ascii_digit() || c == ' ' || c == '-' {
-                Some(c)
+                c
             } else {
-                Some(' ')
+                ' '
             }
         })
         .collect();
@@ -34,7 +31,7 @@ pub fn string_to_2d_array(s: String) -> Vec<Vec<char>> {
     s.lines().map(|l| l.chars().collect()).collect()
 }
 
-pub fn print_2d_array(world: &Vec<Vec<char>>) {
+pub fn print_2d_array(world: &[Vec<char>]) {
     for line in world.iter() {
         for c in line.iter() {
             print!("{}", c);
@@ -51,7 +48,7 @@ enum NodeOp {
 
 pub fn dfs<T: Hash + Eq + Copy>(
     graph: &HashMap<T, Vec<T>>,
-    roots: &Vec<T>,
+    roots: &[T],
     postorder: bool,
 ) -> Vec<T> {
     let mut marks: HashMap<T, NodeOp> = HashMap::new();
@@ -72,9 +69,11 @@ pub fn dfs<T: Hash + Eq + Copy>(
                             result.push(*node);
                         }
                         stack.push((NodeOp::Mark, node));
-                        if let Some(sucessors) = graph.get(node) { stack.extend(
-                            sucessors.iter().map(|successor| (NodeOp::Visit, successor)),
-                        ) }
+                        if let Some(sucessors) = graph.get(node) {
+                            stack.extend(
+                                sucessors.iter().map(|successor| (NodeOp::Visit, successor)),
+                            )
+                        }
                     }
                 },
                 NodeOp::Mark => {
@@ -108,7 +107,7 @@ impl Tile {
         }
     }
 
-    pub fn from_world(world: &Vec<Vec<char>>, x: usize, y: usize) -> Self {
+    pub fn from_world(world: &[Vec<char>], x: usize, y: usize) -> Self {
         Tile {
             x,
             y,
@@ -117,7 +116,7 @@ impl Tile {
         }
     }
 
-    pub fn char_at(&self, world: &Vec<Vec<char>>) -> Option<char> {
+    pub fn char_at(&self, world: &[Vec<char>]) -> Option<char> {
         if self.y >= world.len() || self.x >= world[self.y].len() {
             None
         } else {
@@ -125,7 +124,7 @@ impl Tile {
         }
     }
 
-    pub fn digit_at(&self, world: &Vec<Vec<char>>) -> Option<u32> {
+    pub fn digit_at(&self, world: &[Vec<char>]) -> Option<u32> {
         if self.y >= world.len() || self.x >= world[self.y].len() {
             None
         } else {

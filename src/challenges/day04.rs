@@ -14,13 +14,13 @@ pub struct Args {
 pub fn part1(args: &Args) -> u64 {
     let input = fs::read_to_string(&args.file).expect("I/O error");
     let mut world = string_to_2d_array(input);
-    
+
     find_word_any_direction(&mut world, "XMAS")
 }
 
 fn check_direction(
     tile: Tile,
-    world: &Vec<Vec<char>>,
+    world: &[Vec<char>],
     direction_func: fn(&Tile) -> Option<Tile>,
     word: &str,
 ) -> u64 {
@@ -51,7 +51,7 @@ fn check_direction(
     }
 }
 
-fn find_word_any_direction(world: &mut Vec<Vec<char>>, word: &str) -> u64 {
+fn find_word_any_direction(world: &mut [Vec<char>], word: &str) -> u64 {
     let mut count = 0;
     for (y, line) in world.iter().enumerate() {
         for (x, _) in line.iter().enumerate() {

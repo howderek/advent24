@@ -46,7 +46,7 @@ pub fn parse_puzzle(input: &str) -> Vec<Block> {
     output
 }
 
-pub fn score_fs(fs: &Vec<Block>) -> usize {
+pub fn score_fs(fs: &[Block]) -> usize {
     let mut sum = 0;
     for (i, block) in fs.iter().enumerate() {
         if let Block::File { id } = block {

@@ -1,6 +1,6 @@
 use advent24::{
     bytegrid::{ByteGrid, Point, ORIGIN},
-    parse_number_list, parse_number_list_delimited_by,
+    parse_number_list_delimited_by,
 };
 use clap;
 use pathfinding::prelude::*;

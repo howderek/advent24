@@ -1,4 +1,3 @@
-#![feature(extract_if)]
 use advent24::bytegrid::{ByteGrid, Point, EAST, NORTH, SOUTH, WEST};
 use clap;
 use pathfinding::prelude::*;
@@ -11,53 +10,6 @@ pub struct Args {
 
     #[clap(long, short, action)]
     part2: bool,
-}
-
-fn take_step(world: &mut ByteGrid, from: Point, towards: u8) -> Option<Point> {
-    let my_char = world[from];
-    if let Some(heading) = match towards {
-        b'^' => Some(NORTH),
-        b'>' => Some(EAST),
-        b'<' => Some(WEST),
-        b'v' => Some(SOUTH),
-        _ => None,
-    } {
-        let next_pos = from + heading;
-        let behind_next_pos = from + heading + heading;
-        if !world.is_valid_point(behind_next_pos) {
-            return Some(from);
-        }
-        match (world[next_pos], world[behind_next_pos]) {
-            (b'O', b'.') => {
-                world[from] = b'.';
-                world[next_pos] = my_char;
-                world[behind_next_pos] = b'O';
-                Some(next_pos)
-            }
-            (b'O', b'O') => {
-                if let Some(point) = take_step(world, next_pos, towards) {
-                    if point != next_pos {
-                        world[from] = b'.';
-                        world[next_pos] = my_char;
-                        world[behind_next_pos] = b'O';
-                        Some(next_pos)
-                    } else {
-                        Some(from)
-                    }
-                } else {
-                    Some(from)
-                }
-            }
-            (b'.', b'.') | (b'.', b'#') | (b'.', b'O') => {
-                world[from] = b'.';
-                world[next_pos] = my_char;
-                Some(next_pos)
-            }
-            _ => Some(from),
-        }
-    } else {
-        None
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -220,7 +172,7 @@ pub fn part2(input: &str) -> u32 {
     let heuristic = |p: &Reindeer| -> u32 { p.dist(&goal) };
     let success = |p: &Reindeer| p.pos == goal.pos;
 
-    let (paths, total_cost) =
+    let (paths, _) =
         astar_bag_collect(&start, successors, heuristic, success).expect("no path found");
 
     let mut tiles: HashSet<Point> = HashSet::new();
