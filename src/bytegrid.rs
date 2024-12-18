@@ -59,6 +59,10 @@ impl Point {
             self + SOUTHEAST,
         ]
     }
+
+    pub fn distance(&self, other: &Point) -> u32 {
+        self.row.abs_diff(other.row) + self.col.abs_diff(other.col)
+    }
 }
 
 impl Add for Point {
