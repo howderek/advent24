@@ -9,6 +9,7 @@ dependencies = [
  "atoi",
  "clap",
  "itertools",
+ "min-max-heap",
  "nalgebra",
  "pathfinding",
  "regex",
@@ -233,6 +234,12 @@ name = "memchr"
 version = "2.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f665ee40bc4a3c5590afb1e9677db74a508659dfd71e126420da8274909a0167"
+
+[[package]]
+name = "min-max-heap"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2687e6cf9c00f48e9284cf9fd15f2ef341d03cc7743abf9df4c5f07fdee50b18"
 
 [[package]]
 name = "nalgebra"
